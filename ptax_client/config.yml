@@ -1,0 +1,24 @@
+---
+request:
+  base_url: "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do"
+  params:
+    method: "gerarCSVFechamentoMoedaNoPeriodo"
+    ChkMoeda: null
+    DATAINI: null
+    DATAFIM: null
+
+error:
+  xpath: "string(//div[@class=\"msgErro\"])"
+  msgs:
+    no_data: 'Não existe informação para a pesquisa efetuada!'
+
+date_format: "%d/%m/%Y"
+currencies_ids:
+  USD: 61
+  EUR: 222
+  # further addition according to demand
+
+csv:
+  delimiter: ';'
+  columns: ["date", "dummy1", "dummy2", "currency", "buying_ptax", "selling_ptax", "dummy3", "dummy4"]
+  desired_columns: ["date", "currency", "buying_ptax", "selling_ptax"]
