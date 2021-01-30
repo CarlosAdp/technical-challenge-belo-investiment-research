@@ -1,5 +1,5 @@
-import os
-from datetime import date
+from datetime import date, timedelta
+import unittest
 
 import ptax_client
 
@@ -7,26 +7,87 @@ import ptax_client
 client = ptax_client.PTAXClient()
 
 
-def test_config_file_exists():
-    assert os.path.exists(client._config_file), \
-            'Config file does not exist'
+class PTAXUnitTest(unittest.TestCase):
+    client: ptax_client.PTAXClient
+
+    def setUp(self: 'PTAXUnitTest') -> None:
+        self.client = ptax_client.PTAXClient()
+
+    def tearDown(self: 'PTAXUnitTest') -> None:
+        self.client.close()
+
+    def test_non_empty(self: 'PTAXUnitTest'):
+        self.assertFalse(
+            expr=self.client.get(
+                start_date=date(2021, 1, 1),
+                end_date=date(2021, 1, 20),
+                currency='USD'
+            ).empty,
+            msg='Should be a non-empty pandas data frame'
+        )
+
+    def test_empty(self: 'PTAXUnitTest'):
+        self.assertTrue(
+            expr=self.client.get(
+                start_date=date(2021, 1, 1),
+                end_date=date(2021, 1, 2),
+                currency='USD'
+            ).empty,
+            msg='Should be an empty pandas data frame'
+        )
+
+    def test_100_days_interval(self: 'PTAXUnitTest'):
+        start_date = date(2020, 1, 1)
+        end_date = start_date + timedelta(days=100)
+
+        self.assertFalse(
+            expr=self.client.get(
+                start_date=start_date,
+                end_date=end_date,
+                currency='USD'
+            ).empty,
+            msg='Should be a non-empty pandas data frame'
+        )
+
+    def test_200_days_interval(self: 'PTAXUnitTest'):
+        start_date = date(2020, 1, 1)
+        end_date = start_date + timedelta(days=200)
+
+        self.assertFalse(
+            expr=self.client.get(
+                start_date=start_date,
+                end_date=end_date,
+                currency='USD'
+            ).empty,
+            msg='Should be a non-empty pandas data frame'
+        )
+
+    def test_500_days_interval(self: 'PTAXUnitTest'):
+        start_date = date(2020, 1, 1)
+        end_date = start_date + timedelta(days=500)
+
+        self.assertFalse(
+            expr=self.client.get(
+                start_date=start_date,
+                end_date=end_date,
+                currency='USD'
+            ).empty,
+            msg='Should be a non-empty pandas data frame'
+        )
+
+    def test_inverted_interval(self: 'PTAXUnitTest'):
+        exception = ptax_client.exceptions.InvertedIntervalError
+        start_date = date(2021, 1, 1)
+        end_date = start_date - timedelta(days=100)
+
+        self.assertRaises(
+            exception,
+            self.client.get,
+            start_date,
+            end_date,
+            'USD',
+        )
 
 
-def test_config_not_empty():
-    assert client.config, 'Configuration is empty'
-
-
-def test_not_empty():
-    assert not client.get(
-        initial_date=date(2021, 1, 1),
-        final_date=date(2021, 1, 20),
-        currency='USD'
-    ).empty, 'Should be a non-empty pandas data frame'
-
-
-def test_no_data():
-    assert client.get(
-        initial_date=date(2021, 1, 1),
-        final_date=date(2021, 1, 2),
-        currency='USD'
-    ).empty, 'Should be an empty pandas data frame'
+if __name__ == '__main__':
+    unittest.main()

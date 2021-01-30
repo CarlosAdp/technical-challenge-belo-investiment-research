@@ -11,6 +11,7 @@ error:
   xpath: "string(//div[@class=\"msgErro\"])"
   msgs:
     no_data: 'Não existe informação para a pesquisa efetuada!'
+    inverted_interval: 'A data inicial deve ser menor que a data final'
 
 date_format: "%d/%m/%Y"
 currencies_ids:

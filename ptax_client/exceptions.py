@@ -1,0 +1,2 @@
+class InvertedIntervalError(Exception):
+    pass
