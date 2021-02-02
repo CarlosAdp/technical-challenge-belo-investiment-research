@@ -1,5 +1,2 @@
-open-close-mixin>=1.1.2
-pandas>=1.2.1
-pyYaml>=5.4.1
-requests>=2.25.1
-lxml>=4.6.2
+flake8
+pytest

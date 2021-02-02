@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 import unittest
 
-import ptax_client
+from flask_app import ptax_client
 
 
 client = ptax_client.PTAXClient()
