@@ -1,19 +1,50 @@
 version: '3'
 services:
-  flask:
+  appserver:
     build:
       context: flask_app
       dockerfile: Dockerfile
-    container_name: ptax_flask
-    image: ptax_flask
+    container_name: ptax_appserver
+    image: ptax_appserver
     restart: unless-stopped
     environment:
-      FLASK_DEBUG: 'False'
-      FLASK_PORT: 8080
+      APP_DEBUG: 'False'
+      APP_PORT: 8080
     volumes:
-      - ptax_flask_data:/var/www
-    network_mode: host
+      - ptax_appserver_data:/var/www
+    networks:
+      - backend
+      - frontend
+
+  webserver:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: ptax_webserver
+    container_name: ptax_webserver
+    restart: unless-stopped
+    environment:
+      APP_NAME: 'webserver'
+      APP_DEBUG: 'true'
+      SERVICE_NAME: 'webserver'
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginxdata:/var/log/nginx
+    depends_on:
+      - appserver
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
 
 volumes:
-  ptax_flask_data:
+  ptax_appserver_data:
+    driver: local
+  nginxdata:
     driver: local
