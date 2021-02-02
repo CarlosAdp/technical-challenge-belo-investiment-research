@@ -10,7 +10,7 @@ import requests
 import pandas
 from open_close_mixin import OpenCloseMixin
 
-from .exceptions import InvertedIntervalError
+from .exceptions import InvalidIntervalError
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.yml')
 
@@ -54,22 +54,28 @@ class PTAXClient(OpenCloseMixin):
         currencies_ids = config['currencies_ids']
         date_format = config['date_format']
 
-        params.update({
-            'ChkMoeda': currencies_ids[currency],
-            'DATAINI': start_date.strftime(date_format),
-            'DATAFIM': end_date.strftime(date_format)
-        })
-
-        response = requests.get(url=base_url, params=params)
+        start_date = start_date.strftime(date_format)
+        end_date = end_date.strftime(date_format)
 
         try:
+            params.update({
+                'ChkMoeda': currencies_ids[currency],
+                'DATAINI': start_date,
+                'DATAFIM': end_date
+            })
+
+            response = requests.get(url=base_url, params=params)
+
             content = StringIO(response.text)
-            return pandas.read_csv(
+            result = pandas.read_csv(
                 content,
                 delimiter=config['csv']['delimiter'],
                 names=config['csv']['columns'],
                 usecols=config['csv']['desired_columns']
             )
+            result.set_index(keys=config['csv']['index'], inplace=True)
+
+            return result
         except pandas.errors.ParserError:
             dom = etree.fromstring(response.text, parser=etree.HTMLParser())
             error = dom.xpath(config['error']['xpath'])
@@ -80,6 +86,10 @@ class PTAXClient(OpenCloseMixin):
                 )
 
             if config['error']['msgs']['inverted_interval'] in error:
-                raise InvertedIntervalError('Parameters: (%s, %s, %s)' % (
-                        start_date, end_date, currency
-                ))
+                raise InvalidIntervalError(
+                    'Invalid interval: %s-%s' % (start_date, end_date)
+                ) from None
+        except KeyError:
+            raise KeyError(
+                'Currency %s is not registered yet. Avaliable currencies: %s'
+            )

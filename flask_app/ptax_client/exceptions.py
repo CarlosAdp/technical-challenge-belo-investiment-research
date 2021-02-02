@@ -1,2 +1,2 @@
-class InvertedIntervalError(Exception):
+class InvalidIntervalError(Exception):
     pass

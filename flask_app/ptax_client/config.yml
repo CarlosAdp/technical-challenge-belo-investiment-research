@@ -23,3 +23,4 @@ csv:
   delimiter: ';'
   columns: ["date", "dummy1", "dummy2", "currency", "buying_ptax", "selling_ptax", "dummy3", "dummy4"]
   desired_columns: ["date", "currency", "buying_ptax", "selling_ptax"]
+  index: "date"
