@@ -90,6 +90,4 @@ class PTAXClient(OpenCloseMixin):
                     'Invalid interval: %s-%s' % (start_date, end_date)
                 ) from None
         except KeyError:
-            raise KeyError(
-                'Currency %s is not registered yet. Avaliable currencies: %s'
-            )
+            raise KeyError(f'Currency {currency} is not registered yet.')
