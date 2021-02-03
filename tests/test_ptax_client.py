@@ -75,8 +75,8 @@ class PTAXUnitTest(unittest.TestCase):
             msg='Should be a non-empty pandas data frame'
         )
 
-    def test_inverted_interval(self: 'PTAXUnitTest'):
-        exception = ptax_client.exceptions.InvertedIntervalError
+    def test_invalid_interval(self: 'PTAXUnitTest'):
+        exception = ptax_client.exceptions.InvalidIntervalError
         start_date = date(2021, 1, 1)
         end_date = start_date - timedelta(days=100)
 

@@ -1,4 +1,5 @@
 import os
+import urllib
 from datetime import datetime
 
 from flask import Flask, jsonify, request, make_response
@@ -6,11 +7,43 @@ from ptax_client import PTAXClient, exceptions
 
 
 application = Flask(__name__)
+application.config['JSON_SORT_KEYS'] = False
 
 
 @application.route('/')
 def hello():
-    return jsonify(todo='Documentation')
+    endpoint = urllib.parse.urljoin(
+        request.base_url,
+        'ptax_data?' + '&'.join((
+            'start={START_DATE}',
+            'end={END_DATE}',
+            'currencies={CUR1},{CUR2}'
+        ))
+    )
+
+    description = 'Endpoint for ptax data extraction. It returns a CSV file.'
+
+    parameters = {
+        'START_DATE': 'The first date of the period for which you want ptax '
+        'data to be extracted. Format: DD/MM/YYYY.',
+        'END_DATE': 'Then end date of the period for which you want ptax data '
+        'to be extracted. Format: DD/MM/YYYY. Must be higher than START_DATE.',
+        'CUR': 'Currency according to the ISO 4217 standard.'
+    }
+
+    example = endpoint.format(
+        START_DATE='01/01/2021',
+        END_DATE='10/01/2021',
+        CUR1='USD',
+        CUR2='EUR'
+    )
+
+    return jsonify(
+        endpoint=endpoint,
+        description=description,
+        parameters=parameters,
+        example=example
+    )
 
 
 @application.route('/ptax_data')
@@ -51,6 +84,8 @@ def get_ptax_data():
         response.headers["Content-Disposition"] = \
             "attachment; filename=export.csv"
         response.headers["Content-Type"] = "text/csv"
+
+        client.close()
 
         return response
     except (
